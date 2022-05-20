@@ -1,0 +1,119 @@
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <img src="assets/4826435.jpg" class="img-fluid" alt="" srcset="">
+        </div>
+        <div class="col-lg-6">
+            <div class="shadow-lg bg-white p-5 mt-3 mb-3 rounded">
+                <h2 class="landing-title mt-3">
+                    <i class="fa-solid fa-user-plus"></i>
+                    Registration Form</h2>
+                <form [formGroup]="signUpForm">
+                    <label for="name">
+                        <i class="fa-solid fa-file-signature"></i>
+                        Username</label>
+                <input [class.is-invalid]="username?.invalid && username?.dirty" [class.is-valid]="username?.valid" formControlName="username" #inputName name="name" type="text" class="form-control w-70">
+                <!--Start Handling Error Messages-->
+                <div *ngIf="username?.errors?.['required'] && username?.dirty" class="alert alert-danger text-danger fw-bold mt-2">
+                    This field is required.
+                </div>
+                <div *ngIf="username?.errors?.['maxlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Maximum Length is 15.
+                </div>
+                <div *ngIf="username?.errors?.['minlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Minimum Length is 15.
+                </div>
+                <div *ngIf="username?.errors?.['pattern']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Just English Characters In Your Name with No Spaces, No Special Characters Allowed
+                </div>
+                <!--End Handling Error Messages-->
+                <br>
+                <label for="Email"><i class="fa-solid fa-envelope"></i> Email</label>
+                <input #inputEmail formControlName="email" [class.is-invalid]="email?.invalid && email?.dirty" [class.is-valid]="email?.valid" name="Email" type="email" class="form-control w-70">
+                <!--Start Handling Error Messages-->
+                <div *ngIf="email?.errors?.['required'] && email?.dirty" class="alert alert-danger text-danger fw-bold mt-2">
+                    This field is required.
+                </div>
+                <div *ngIf="email?.errors?.['maxlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Maximum Length is 20.
+                </div>
+                <div *ngIf="email?.errors?.['minlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Minimum Length is 7.
+                </div>
+                <div *ngIf="email?.errors?.['pattern']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Please Enter a Valid Email ex: test@test.com
+                </div>
+                <!--End Handling Error Messages-->
+                <br>
+                <label for="nationality"><i class="fa-solid fa-id-card"></i> Nationality</label>
+                <div *ngIf="isPageLoaded" class="d-flex justify-content-start pt-5">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div [class.visibility-hidden]="userInfooo">
+                    <select class="form-select">
+                        <option selected [value]="userInfooo?.country_name">{{userInfooo?.country_name}}</option>
+                        <option *ngFor="let countries of allCountries" [value]="countries.countryName">{{countries.countryName}}</option>
+                    </select>
+                </div>  
+                <br>
+                <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                <input #inputPassword [class.is-invalid]="password?.invalid && password?.dirty" [class.is-valid]="password?.valid" formControlName="password" name="password" type="password" class="form-control w-70">
+                <!--Start Handling Error Messages-->
+                <div *ngIf="password?.errors?.['required'] && password?.dirty" class="alert alert-danger text-danger fw-bold mt-2">
+                    This field is required.
+                </div>
+                <div *ngIf="password?.errors?.['maxlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Maximum Length is 20.
+                </div>
+                <div *ngIf="password?.errors?.['minlength']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Minimum Length is 7.
+                </div>
+                <div *ngIf="password?.errors?.['pattern']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Please Enter a Valid Password ex: ahmeddashraf44
+                </div>
+                <!--End Handling Error Messages-->
+                <br>
+                <label for="cpassword"><i class="fa-solid fa-key"></i> Confirm Password</label>
+                <input formControlName="confPassword" [class.is-invalid]="confPassword?.invalid && confPassword?.dirty" [class.is-valid]="confPassword?.valid" name="cpassword" type="password" class="form-control w-70">
+                <!--Start Handling Error Messages-->
+                <div *ngIf="confPassword?.errors?.['required'] && confPassword?.dirty" class="alert alert-danger text-danger fw-bold mt-2">
+                    confirm password is required.
+                </div>
+                <div *ngIf="confPassword?.errors?.['isPasswordMathc']" class="alert alert-danger text-danger fw-bold mt-2">
+                    Password dosen't Match
+                </div>
+                <!--End Handling Error Messages-->
+                <br>
+                <label for="ip"><i class="fa-solid fa-mobile-screen-button"></i> IP Address</label>
+                <div *ngFor="let ipAddress of currentIP">
+                    <input #inputIP name="IP" type="text" disabled [value]="ipAddress.ip" class="form-control w-70">
+                </div>
+                <div *ngIf="isPageLoaded" class="d-flex justify-content-start pt-5">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                </form>
+                
+                <br>
+                <div class="alert alert-success text-success fw-bold">
+                    <small>
+                        <i class="geo fas fa-map-marker-alt fa-fw"></i>
+                        Your Current GeoLocation is:</small>
+                    <div *ngIf="isPageLoaded" class="d-flex justify-content-start pt-5">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    {{userInfooo.city + ', ' + userInfooo.country_name + ', ' + userInfooo.country_code}}
+                </div>
+                <button (click)="signUp(inputName.value,inputEmail.value,inputPassword.value)" class="btn btn-primary mb-3 d-block" [disabled]="signUpForm.invalid">
+                    <i class="signup fa-solid fa-right-to-bracket"></i>
+                    Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
