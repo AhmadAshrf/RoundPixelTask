@@ -1,6 +1,24 @@
 
-<div class="container">
-    <div class="row">
+
+<div class="container" >
+    <div class="row" *ngIf="isLogged">
+        <div class="col-lg-6">
+            <img src="https://img.freepik.com/free-vector/man-thinking-concept-illustration_114360-7920.jpg?w=740&t=st=1653081392~exp=1653081992~hmac=bfdfbd64216a58f6eae4b966d0e2efd606d69e72a9409908a1d735762d7d01fd" class="img-fluid" alt="" srcset="">
+            <!--this dummy link cause i couldn't download it ^_^ -->
+        </div>
+        <div class="col-lg-6 d-flex justify-content-center align-items-center">
+            <div class="alert alert-danger p-3 mb-4 mt-2 d-grid">
+                Hey!, You Already Logged in, You Should go Back Home Page
+                <button (click)="goBack()" class="btn btn-primary mb-3 d-block">
+                    <i class="backHome fa-solid fa-house"></i>
+                    Go Back to Home
+                </button> 
+        </div>
+    </div>
+
+
+    </div>
+    <div class="row" *ngIf="!isLogged">
         <div class="col-lg-6">
             <img src="assets/4826435.jpg" class="img-fluid" alt="" srcset="">
         </div>

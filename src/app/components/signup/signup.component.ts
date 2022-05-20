@@ -7,7 +7,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserIP } from 'src/app/models/ip.model';
 import { InfoIpService } from 'src/app/services/info-ip.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
@@ -19,6 +19,7 @@ export class SignupComponent implements OnInit {
   currentIP: UserIP[] = []
   allCountries!: Countries[]
   isPageLoaded: boolean = true
+  isLogged:boolean = false
   signUpForm: FormGroup
   userInfooo!: UserData
 
@@ -34,7 +35,9 @@ export class SignupComponent implements OnInit {
     private _AllCountries: GetAllCountriesService,
     private _formBuilder: FormBuilder,
     private _userAuthService: UserAuthenticationService,
-    private _router: Router
+    private _router: Router,
+    private _activatedRoute:ActivatedRoute,
+    private _auth:UserAuthenticationService
   ) {
 
     //Reactive Forms
@@ -60,6 +63,9 @@ export class SignupComponent implements OnInit {
  
 
   ngOnInit(): void {
+    this._auth.logInStatus.subscribe(status => {
+      this.isLogged = status
+    })
     //Anthor Solution For Input Checker
     this.signUpForm.get('username')?.valueChanges.subscribe(username => {
       const match = username.match(this.arabicRegExpPattern);
@@ -168,6 +174,11 @@ export class SignupComponent implements OnInit {
   signUp(name: string, email: string, password: string) {
     this._userAuthService.signup(name, email, password)
     this._router.navigateByUrl('/welcome')
+  }
+
+  goBack(){
+    this._router.navigateByUrl('/welcome')
+
   }
 
 }
