@@ -36,7 +36,7 @@
                     <div *ngIf="username?.errors?.['required'] && username?.dirty"
                         class="alert alert-danger text-danger fw-bold mt-2">
                         This field is required.
-                        
+
                     </div>
                     <div *ngIf="username?.errors?.['maxlength']" class="alert alert-danger text-danger fw-bold mt-2">
                         Maximum Length is 15.
@@ -45,7 +45,8 @@
                         Minimum Length is 15.
                     </div>
                     <div *ngIf="username?.errors?.['pattern']" class="alert alert-danger text-danger fw-bold mt-2">
-                        Just English Characters In Your Name with No Spaces, No Special Characters, No Arabic Characters Allowed
+                        Just English Characters In Your Name with No Spaces, No Special Characters, No Arabic Characters
+                        Allowed
                     </div>
                     <!--End Handling Error Messages-->
                     <br>
@@ -140,8 +141,11 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    {{userInfooo?.city + ', ' + userInfooo?.country_name + ', ' + userInfooo?.country_code}}
+                    <span [class.d-none]="userInfooo == null">
+                        {{userInfooo?.city + ', ' + userInfooo?.country_name + ', ' + userInfooo?.country_code}}
+                    </span>
                 </div>
+
                 <button (click)="signUp(inputName.value,inputEmail.value,inputPassword.value)"
                     class="btn btn-primary mb-3 d-block" [disabled]="signUpForm.invalid">
                     <i class="signup fa-solid fa-right-to-bracket"></i>

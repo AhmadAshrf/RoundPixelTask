@@ -7,7 +7,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserIP } from 'src/app/models/ip.model';
 import { InfoIpService } from 'src/app/services/info-ip.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -18,15 +18,15 @@ import { Subscription } from 'rxjs';
 export class SignupComponent implements OnInit, OnDestroy {
 
   currentIP: UserIP[] = []
-  
+
   allCountries!: Countries[]
   isPageLoaded: boolean = true
-  isLogged:boolean = false
+  isLogged: boolean = false
   signUpForm: FormGroup
   userInfooo!: UserData
 
   //Handle Unsubscription
-  private componentSub:Subscription[] = []
+  private componentSub: Subscription[] = []
 
   private namePattern: string = '^[a-zA-Z0-9]+$'
   private emailPattern: string = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$';
@@ -40,8 +40,7 @@ export class SignupComponent implements OnInit, OnDestroy {
     private _formBuilder: FormBuilder,
     private _userAuthService: UserAuthenticationService,
     private _router: Router,
-    private _activatedRoute:ActivatedRoute,
-    private _auth:UserAuthenticationService
+    private _auth: UserAuthenticationService
   ) {
 
     //Reactive Forms
@@ -62,7 +61,7 @@ export class SignupComponent implements OnInit, OnDestroy {
       Validators.pattern(this.passwordPattern)
       ]],
       confPassword: ['', [Validators.required]]
-    }, {validators: this.isPasswordMathc('password', 'confPassword')})
+    }, { validators: this.isPasswordMathc('password', 'confPassword') })
   }
 
   ngOnInit(): void {
@@ -72,31 +71,31 @@ export class SignupComponent implements OnInit, OnDestroy {
     //Another Solution For Input Checker
     this.signUpForm.get('username')?.valueChanges.subscribe(username => {
       const match = username.match(this.arabicRegExpPattern);
-      if(match) this.signUpForm.get('username')?.setValue(this.username?.value.replace(match, ''));
+      if (match) this.signUpForm.get('username')?.setValue(this.username?.value.replace(match, ''));
     })
 
     let IpObserv = this._getIP.getIP().subscribe(
       {
-        next: (data:any) => {
+        next: (data: any) => {
           this.currentIP.push(data)
           for (let ipAddress of this.currentIP) {
             this.getData(ipAddress.ip)
           }
           this.isPageLoaded = false
-        }, error: (error:any) => {
+        }, error: (error: any) => {
           console.log(error.message)
         }
       })
 
-      
-      this.componentSub.push(IpObserv)
-      
+
+    this.componentSub.push(IpObserv)
+
     let countryObs = this._AllCountries.getAllCoutries().subscribe({
       next: (data: any) => {
         this.allCountries = data
         this.isPageLoaded = false
       },
-      error: (error:any) => { console.log(error.message) }
+      error: (error: any) => { console.log(error.message) }
     })
 
     this.componentSub.push(countryObs)
@@ -112,7 +111,7 @@ export class SignupComponent implements OnInit, OnDestroy {
         }, error: (err: any) => { console.log(err.message) }
       })
 
-      this.componentSub.push(getDataObser)
+    this.componentSub.push(getDataObser)
   }
 
 
@@ -186,16 +185,16 @@ export class SignupComponent implements OnInit, OnDestroy {
     this._router.navigateByUrl('/welcome')
   }
 
-  goBack(){
+  goBack() {
     this._router.navigateByUrl('/welcome')
 
   }
 
   ngOnDestroy(): void {
-    for(let subscription of this.componentSub){
+    for (let subscription of this.componentSub) {
       subscription.unsubscribe()
     }
   }
- 
+
 
 }
