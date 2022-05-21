@@ -140,7 +140,7 @@
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
-                    {{userInfooo.city + ', ' + userInfooo.country_name + ', ' + userInfooo.country_code}}
+                    {{userInfooo?.city + ', ' + userInfooo?.country_name + ', ' + userInfooo?.country_code}}
                 </div>
                 <button (click)="signUp(inputName.value,inputEmail.value,inputPassword.value)"
                     class="btn btn-primary mb-3 d-block" [disabled]="signUpForm.invalid">

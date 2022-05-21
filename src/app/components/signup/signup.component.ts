@@ -3,26 +3,30 @@ import { GetAllCountriesService } from './../../services/get-all-countries.servi
 import { UserAuthenticationService } from './../../services/user-authentication.service';
 import { UserData } from './../../models/userinfo.model';
 import { GetIPService } from './../../services/get-ip.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UserIP } from 'src/app/models/ip.model';
 import { InfoIpService } from 'src/app/services/info-ip.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
   styleUrls: ['./signup.component.scss']
 })
-export class SignupComponent implements OnInit {
+export class SignupComponent implements OnInit, OnDestroy {
 
   currentIP: UserIP[] = []
+  
   allCountries!: Countries[]
   isPageLoaded: boolean = true
   isLogged:boolean = false
   signUpForm: FormGroup
   userInfooo!: UserData
 
+  //Handle Unsubscription
+  private componentSub:Subscription[] = []
 
   private namePattern: string = '^[a-zA-Z0-9]+$'
   private emailPattern: string = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$';
@@ -60,49 +64,55 @@ export class SignupComponent implements OnInit {
       confPassword: ['', [Validators.required]]
     }, {validators: this.isPasswordMathc('password', 'confPassword')})
   }
- 
 
   ngOnInit(): void {
     this._auth.logInStatus.subscribe(status => {
       this.isLogged = status
     })
-    //Anthor Solution For Input Checker
+    //Another Solution For Input Checker
     this.signUpForm.get('username')?.valueChanges.subscribe(username => {
       const match = username.match(this.arabicRegExpPattern);
       if(match) this.signUpForm.get('username')?.setValue(this.username?.value.replace(match, ''));
     })
 
-    this._getIP.getIP().subscribe(
+    let IpObserv = this._getIP.getIP().subscribe(
       {
-        next: (data) => {
+        next: (data:any) => {
           this.currentIP.push(data)
           for (let ipAddress of this.currentIP) {
             this.getData(ipAddress.ip)
           }
           this.isPageLoaded = false
-        }, error: (error) => {
+        }, error: (error:any) => {
           console.log(error.message)
         }
       })
 
-
-    this._AllCountries.getAllCoutries().subscribe({
+      
+      this.componentSub.push(IpObserv)
+      
+    let countryObs = this._AllCountries.getAllCoutries().subscribe({
       next: (data: any) => {
         this.allCountries = data
         this.isPageLoaded = false
       },
       error: (error:any) => { console.log(error.message) }
     })
+
+    this.componentSub.push(countryObs)
   }
 
   getData(ip: string) {
-    this._userInfo.get(ip).subscribe(
+
+    let getDataObser = this._userInfo.get(ip).subscribe(
       {
         next: (data: any) => {
           this.userInfooo = data
           this.isPageLoaded = false
         }, error: (err: any) => { console.log(err.message) }
       })
+
+      this.componentSub.push(getDataObser)
   }
 
 
@@ -180,5 +190,12 @@ export class SignupComponent implements OnInit {
     this._router.navigateByUrl('/welcome')
 
   }
+
+  ngOnDestroy(): void {
+    for(let subscription of this.componentSub){
+      subscription.unsubscribe()
+    }
+  }
+ 
 
 }
