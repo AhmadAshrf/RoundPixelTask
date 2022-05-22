@@ -70,16 +70,19 @@
                     <!--End Handling Error Messages-->
                     <br>
                     <label for="nationality"><i class="fa-solid fa-id-card"></i> Nationality</label>
-                    <div *ngIf="isPageLoaded" class="d-flex justify-content-start pt-5">
+                    <div *ngIf="selectedCountry == null" class="d-flex justify-content-start pt-5">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>
                     </div>
                     <div [class.visibility-hidden]="userInfooo">
-                        <select class="form-select">
-                            <option selected [value]="userInfooo?.country_name">{{userInfooo?.country_name}}</option>
-                            <option *ngFor="let countries of allCountries" [value]="countries.countryName">
-                                {{countries.countryName}}</option>
+                        <select *ngIf="selectedCountry" class="form-select">
+                            <!-- <option selected [value]="userInfooo?.country_name">{{userInfooo?.country_name}}</option> -->
+                            <!--this upper code gonna make two choice on list .. example: egypt will be duplicated, first as defualt, second as a value from list-->
+                            <option *ngFor="let countries of allCountries"
+                                [selected]="countries.countryName == selectedCountry.countryName">
+                                {{countries.countryName + 'ian'}}
+                            </option>
                         </select>
                     </div>
                     <br>
@@ -136,7 +139,7 @@
                     <small>
                         <i class="geo fas fa-map-marker-alt fa-fw"></i>
                         Your Current GeoLocation is:</small>
-                    <div *ngIf="isPageLoaded" class="d-flex justify-content-start pt-5">
+                    <div *ngIf="userInfooo == null" class="d-flex justify-content-start pt-5">
                         <div class="spinner-border" role="status">
                             <span class="visually-hidden">Loading...</span>
                         </div>

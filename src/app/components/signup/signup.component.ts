@@ -24,6 +24,7 @@ export class SignupComponent implements OnInit, OnDestroy {
   isLogged: boolean = false
   signUpForm: FormGroup
   userInfooo!: UserData
+  selectedCountry!: any
 
   //Handle Unsubscription
   private componentSub: Subscription[] = []
@@ -87,7 +88,6 @@ export class SignupComponent implements OnInit, OnDestroy {
         }
       })
 
-
     this.componentSub.push(IpObserv)
 
     let countryObs = this._AllCountries.getAllCoutries().subscribe({
@@ -102,11 +102,13 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   getData(ip: string) {
-
     let getDataObser = this._userInfo.get(ip).subscribe(
       {
         next: (data: any) => {
           this.userInfooo = data
+          this.selectedCountry = this.allCountries.find(el => el.countryName == this.userInfooo.country_name)
+          // console.log(this.userInfooo.country_name)
+          console.log(this.selectedCountry.countryName)
           this.isPageLoaded = false
         }, error: (err: any) => { console.log(err.message) }
       })
@@ -121,11 +123,9 @@ export class SignupComponent implements OnInit, OnDestroy {
   get email() {
     return this.signUpForm.get('email')
   }
-
   get password() {
     return this.signUpForm.get('password')
   }
-
   get confPassword() {
     return this.signUpForm.get('confPassword')
   }
@@ -187,7 +187,6 @@ export class SignupComponent implements OnInit, OnDestroy {
 
   goBack() {
     this._router.navigateByUrl('/welcome')
-
   }
 
   ngOnDestroy(): void {
@@ -195,6 +194,4 @@ export class SignupComponent implements OnInit, OnDestroy {
       subscription.unsubscribe()
     }
   }
-
-
 }
