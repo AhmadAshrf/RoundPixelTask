@@ -12,7 +12,6 @@ export class UserAuthenticationService {
     this.logInStatus = new BehaviorSubject<boolean>(this.isLoggedIn())
    }
 
-
   signup(fullName:string, email:string, password:string){
     localStorage.setItem('fullName', fullName)
     localStorage.setItem('email', email)
@@ -34,12 +33,4 @@ export class UserAuthenticationService {
     let email = localStorage.getItem('email')
     return email != null
   }
-
-
-
-
-
-
-
-
 }

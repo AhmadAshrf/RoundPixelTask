@@ -1,11 +1,12 @@
-
 <div class="container">
     <div class="row">
-        <div *ngIf="UserData == null">
+        
+        <!-- <div *ngIf="UserData == null">
             <div class="alert alert-danger text-danger text-center fw-bold fs-2 mt-5">You're not Authrized to Open this Page!</div>
             <button (click)="redirect()" class="d-block m-auto btn btn-primary mb-3">Back to Signup Page</button>
             <img src="assets/notfound.jpg" class="img-fluid w-50 d-block m-auto"  alt="" srcset="">
-        </div>
+        </div> -->
+
         <div class="col-lg-6 shadow-lg bg-white p-0 mt-3 mb-3 rounded">
             <img [hidden]="UserData == null" src="assets/welcome.jpg" class="img-fluid" alt="">
         </div>

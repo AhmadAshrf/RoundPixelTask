@@ -8,7 +8,7 @@ import { UserIP } from 'src/app/models/ip.model';
 import { InfoIpService } from 'src/app/services/info-ip.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { mergeMap, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-signup',
@@ -17,23 +17,23 @@ import { Subscription } from 'rxjs';
 })
 export class SignupComponent implements OnInit, OnDestroy {
 
-  currentIP: UserIP[] = []
-
-  allCountries!: Countries[]
-  isPageLoaded: boolean = true
-  isLogged: boolean = false
-  signUpForm: FormGroup
-  userInfooo!: UserData
-  selectedCountry!: any
+  //Class Properties
+  public currentIP: UserIP[] = [];
+  public allCountries!: Countries[];
+  public isPageLoaded: boolean = true;
+  public isLogged: boolean = false;
+  public signUpForm: FormGroup;
+  public userInfooo!: UserData;
+  public selectedCountry!: any;
 
   //Handle Unsubscription
-  private componentSub: Subscription[] = []
+  private componentSubscription: Subscription[] = []
 
+  //Form Validation Patterns
   private namePattern: string = '^[a-zA-Z0-9]+$'
   private emailPattern: string = '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$';
   private passwordPattern: string = '^[a-zA-Z0-9]+$'
   private arabicRegExpPattern = /[\u0600-\u06FF]+/i;
-
 
   constructor(private _getIP: GetIPService,
     private _userInfo: InfoIpService,
@@ -41,12 +41,11 @@ export class SignupComponent implements OnInit, OnDestroy {
     private _formBuilder: FormBuilder,
     private _userAuthService: UserAuthenticationService,
     private _router: Router,
-    private _auth: UserAuthenticationService
-  ) {
-
+    private _auth: UserAuthenticationService) 
+    {
     //Reactive Forms
     this.signUpForm = this._formBuilder.group({
-      username: [null, [Validators.required,
+      username: ['',[Validators.required,
       Validators.maxLength(15),
       Validators.minLength(4),
       Validators.pattern(this.namePattern)
@@ -66,58 +65,45 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this._auth.logInStatus.subscribe(status => {
+    let logStatusObserv = this._auth.logInStatus.subscribe(status => {
       this.isLogged = status
     })
+    this.componentSubscription.push(logStatusObserv)
+
     //Another Solution For Input Checker
     this.signUpForm.get('username')?.valueChanges.subscribe(username => {
       const match = username.match(this.arabicRegExpPattern);
       if (match) this.signUpForm.get('username')?.setValue(this.username?.value.replace(match, ''));
     })
 
-    let IpObserv = this._getIP.getIP().subscribe(
-      {
-        next: (data: any) => {
-          this.currentIP.push(data)
-          for (let ipAddress of this.currentIP) {
-            this.getData(ipAddress.ip)
-          }
-          this.isPageLoaded = false
-        }, error: (error: any) => {
-          console.log(error.message)
-        }
-      })
-
-    this.componentSub.push(IpObserv)
-
     let countryObs = this._AllCountries.getAllCoutries().subscribe({
       next: (data: any) => {
         this.allCountries = data
         this.isPageLoaded = false
       },
-      error: (error: any) => { console.log(error.message) }
+      error: (error: Error) => { console.log(error.message) }
     })
+    this.componentSubscription.push(countryObs)
 
-    this.componentSub.push(countryObs)
-  }
-
-  getData(ip: string) {
-    let getDataObser = this._userInfo.get(ip).subscribe(
-      {
+    //Merge two APIs with [MergeMap] Observable Operators
+    let nestedObservable = this._getIP.getIP().pipe(
+      mergeMap((data) => {
+        //MergeMap Must Return an Observable
+        this.currentIP.push(data)
+        return this._userInfo.get(data.ip)
+      })).subscribe({
         next: (data: any) => {
           this.userInfooo = data
           this.selectedCountry = this.allCountries.find(el => el.countryName == this.userInfooo.country_name)
-          // console.log(this.userInfooo.country_name)
-          console.log(this.selectedCountry.countryName)
           this.isPageLoaded = false
-        }, error: (err: any) => { console.log(err.message) }
+        },
+        error: (err: Error) => { console.log(err.message) }
       })
-
-    this.componentSub.push(getDataObser)
+      this.componentSubscription.push(nestedObservable)
   }
 
-
-  get username() { //Dealing with Methods as Properties in DOM
+  //Dealing with Methods as Properties
+  get username() {
     return this.signUpForm.get('username')
   }
   get email() {
@@ -135,7 +121,6 @@ export class SignupComponent implements OnInit, OnDestroy {
     return (formGroup: FormGroup) => {
       const PassControl = formGroup.controls[password]
       const ConfPassControl = formGroup.controls[confPassword]
-
       if (ConfPassControl.errors && !ConfPassControl.errors['isPasswordMathc']) return
       if (PassControl.value != ConfPassControl.value) {
         ConfPassControl.setErrors({ isPasswordMathc: true })
@@ -144,41 +129,6 @@ export class SignupComponent implements OnInit, OnDestroy {
       }
     }
   }
-
-
-  // //Custom Validator on Input
-  // isInputValid(ev: any) {
-  //   return (formGroup: FormGroup) => {
-  //     const strControl = formGroup.controls[ev.target.value]
-  //     if (strControl.errors && !strControl.errors['isInputValid']) return
-  //     let pattern = new RegExp(/^[\u0621-\u064A]+$/)
-  //     if (pattern.test(ev.target.value)) {
-  //       ev.preventDefault()
-  //       strControl.setErrors(null)
-  //     } else {
-  //       strControl.setErrors({ isInputValid: true })
-  //     }
-  //   }
-  // }
-
-  // //Input Validation with Event
-  // InputChecker(ev: any) {
-  //   let pattern = new RegExp(/^[\u0621-\u064A]+$/)
-  //   if (pattern.test(ev.target.value)) ev.preventDefault()
-  // }
-
-  //Another way For disable Arabic on Input
-  // InputChecker(ev: any){
-  //   const eventWhich = ev.which
-  //   console.log(eventWhich)
-  //   if(eventWhich == 32) return true;
-  //   if(48 <= eventWhich && eventWhich <= 57) return true;
-  //   if(65 <= eventWhich && eventWhich <= 90) return true;
-  //   if(97 <= eventWhich && eventWhich <= 122) return true;
-  //   return false;
-  // }
-
-
 
   signUp(name: string, email: string, password: string) {
     this._userAuthService.signup(name, email, password)
@@ -190,8 +140,60 @@ export class SignupComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    for (let subscription of this.componentSub) {
+    for (let subscription of this.componentSubscription) {
       subscription.unsubscribe()
-    }
+    }    
   }
 }
+
+
+  //This is a Nested Subscriptions in Production May Cause a Huge Performance ERROR
+
+  // let IpObserv = this._getIP.getIP().subscribe(
+  //   {        
+  //     next: (data: any) => {
+  //       this.currentIP.push(data)
+  //       for (let ipAddress of this.currentIP) {
+  //         // this.getData(ipAddress.ip)
+  //       }
+  //       this.isPageLoaded = false
+  //     }, error: (error: any) => {console.log(error.message)} 
+  //   })
+  // this.componentSub.push(IpObserv)
+
+  // getData(ip: string) {
+  //   let getDataObser = this._userInfo.get(ip).pipe().subscribe(
+  //     {
+  //       next: (data: any) => {
+  //         this.userInfooo = data
+  //         this.selectedCountry = this.allCountries.find(el => el.countryName == this.userInfooo.country_name)
+  //         this.isPageLoaded = false
+  //       }, error: (err: any) => { console.log(err.message) }
+  //     })
+  //   this.componentSub.push(getDataObser)
+  // }
+
+  /************************************************************ */
+  /************************************************************ */
+
+  // Input Validation with Event :
+
+  // InputChecker(ev: any) {
+  //   let pattern = new RegExp(/^[\u0621-\u064A]+$/)
+  //   if (pattern.test(ev.target.value)) ev.preventDefault()
+  // }
+
+  /************************************************************ */
+  /************************************************************ */
+
+  //Another way For disable Arabic on Input :
+
+  // InputChecker(ev: any){
+  //   const eventWhich = ev.which
+  //   console.log(eventWhich)
+  //   if(eventWhich == 32) return true;
+  //   if(48 <= eventWhich && eventWhich <= 57) return true;
+  //   if(65 <= eventWhich && eventWhich <= 90) return true;
+  //   if(97 <= eventWhich && eventWhich <= 122) return true;
+  //   return false;
+  // }
